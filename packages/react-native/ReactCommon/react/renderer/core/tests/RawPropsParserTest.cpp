@@ -66,7 +66,7 @@ TEST(RawPropsParserTest, ownsComposedKeys) {
   RawPropsParser parser;
   parser.prepare<ComposedKeyProps>();
 
-  auto values = folly::dynamic::object();
+  folly::dynamic values = folly::dynamic::object();
   for (const auto& parts : keyParts) {
     const std::string prefix = parts.prefix ? parts.prefix : "";
     const std::string suffix = parts.suffix ? parts.suffix : "";
@@ -92,7 +92,7 @@ TEST(RawPropsParserTest, ownsTemporaryNamesAcrossStorageGrowth) {
   RawPropsParser parser;
   parser.prepare<TemporaryKeyProps>();
 
-  auto values = folly::dynamic::object();
+  folly::dynamic values = folly::dynamic::object();
   for (int i = 0; i < 32; ++i) {
     values["prop" + std::to_string(i)] = i;
   }
