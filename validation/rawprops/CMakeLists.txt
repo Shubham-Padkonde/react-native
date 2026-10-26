@@ -18,6 +18,12 @@ FetchContent_Declare(boost_source URL https://archives.boost.io/release/1.83.0/s
 FetchContent_Declare(folly_source URL https://github.com/facebook/folly/archive/refs/tags/v2024.11.18.00.tar.gz)
 FetchContent_Declare(googletest URL https://github.com/google/googletest/archive/refs/tags/v1.15.2.tar.gz)
 FetchContent_MakeAvailable(glog fmt fast_float double_conversion googletest)
+# Mirror React Native's exported glog headers, without exposing its private
+# demangle.h as a system libiberty header to Folly's feature detection.
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/glog-export/glog)
+file(GLOB glog_headers ${glog_SOURCE_DIR}/src/glog/*.h ${glog_BINARY_DIR}/glog/*.h)
+file(COPY ${glog_headers} DESTINATION ${CMAKE_BINARY_DIR}/glog-export/glog)
+set_target_properties(glog PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "$<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/glog-export>")
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/include/double-conversion)
 file(GLOB conversion_headers ${double_conversion_SOURCE_DIR}/src/*.h)
 file(COPY ${conversion_headers} DESTINATION ${CMAKE_BINARY_DIR}/include/double-conversion)
