@@ -1,0 +1,47 @@
+name: RawProps ownership validation
+on:
+  push:
+    branches: [validation/rawprops-key-ownership]
+permissions:
+  contents: read
+jobs:
+  sanitizer:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 3
+      - run: sudo apt-get update && sudo apt-get install -y clang libc++-dev libc++abi-dev ninja-build
+      - name: Build actual production sources and regression tests
+        run: |
+          cmake -S validation/rawprops -B build-rawprops -G Ninja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
+          cmake --build build-rawprops -j 2
+      - name: Fixed regression tests under AddressSanitizer
+        env:
+          ASAN_OPTIONS: detect_stack_use_after_return=1
+        run: timeout 60 build-rawprops/rawprops_tests --gtest_output=xml:fixed.xml
+      - name: Unchanged production negative controls
+        env:
+          ASAN_OPTIONS: detect_stack_use_after_return=1
+        run: |
+          git restore --source=54b5f22c33773a83de8fb6dc9a7091ba180842b4 -- packages/react-native/ReactCommon/react/renderer/core/RawPropsParser.h packages/react-native/ReactCommon/react/renderer/core/RawPropsParser.cpp
+          cmake --build build-rawprops -j 2
+          for test in ownsComposedKeys ownsTemporaryNamesAcrossStorageGrowth; do
+            set +e
+            timeout 60 build-rawprops/rawprops_tests --gtest_filter=RawPropsParserTest.$test > baseline-$test.log 2>&1
+            result=$?
+            set -e
+            cat baseline-$test.log
+            test "$result" -ne 0
+            test "$result" -ne 124
+            grep -E 'AddressSanitizer: (heap-use-after-free|stack-use-after-return|stack-use-after-scope)' baseline-$test.log
+          done
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: rawprops-evidence
+          path: |
+            fixed.xml
+            baseline-*.log
+
