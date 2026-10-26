@@ -15,6 +15,7 @@
 #include <react/renderer/core/RawPropsKeyMap.h>
 #include <react/renderer/core/RawPropsPrimitives.h>
 #include <react/renderer/core/RawValue.h>
+#include <string>
 #include <string_view>
 
 namespace facebook::react {
@@ -74,7 +75,7 @@ class RawPropsParser final {
    */
   const RawValue *at(const RawProps &rawProps, std::string_view key) const noexcept;
 
-  mutable std::vector<std::string_view> keys_{};
+  mutable std::vector<std::string> keys_{};
   mutable RawPropsKeyMap nameToIndex_{};
   mutable bool ready_{false};
 };

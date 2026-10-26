@@ -39,7 +39,7 @@ const RawValue* RawPropsParser::at(
     }
     // This is not thread-safe part; this happens only during initialization of
     // a `ComponentDescriptor` where it is actually safe.
-    keys_.push_back(key);
+    keys_.emplace_back(key);
     react_native_assert(size < std::numeric_limits<RawPropsValueIndex>::max());
     nameToIndex_.insert(key, static_cast<RawPropsValueIndex>(size));
     return nullptr;
