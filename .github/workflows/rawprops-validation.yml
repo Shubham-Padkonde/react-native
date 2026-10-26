@@ -25,6 +25,7 @@ jobs:
         env:
           ASAN_OPTIONS: detect_stack_use_after_return=1
         run: |
+          git fetch origin 54b5f22c33773a83de8fb6dc9a7091ba180842b4 --depth=1
           git restore --source=54b5f22c33773a83de8fb6dc9a7091ba180842b4 -- packages/react-native/ReactCommon/react/renderer/core/RawPropsParser.h packages/react-native/ReactCommon/react/renderer/core/RawPropsParser.cpp
           cmake --build build-rawprops -j 2
           for test in ownsComposedKeys ownsTemporaryNamesAcrossStorageGrowth; do
